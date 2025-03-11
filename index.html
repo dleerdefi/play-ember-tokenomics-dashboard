@@ -492,70 +492,172 @@
     
     <script src="script.js"></script>
     
-    <!-- Add these inline scripts at the bottom of your HTML file -->
+    <!-- Add this at the end of your HTML file, just before the closing </body> tag -->
     <script>
-        function saveData() {
-            console.log("Save button clicked directly");
-            try {
-                // Simple data collection
+        // Add this script to ensure all form fields are exported
+        (function() {
+            console.log("Initializing comprehensive export functionality");
+            
+            // Direct connection to export button using a unique function name
+            document.getElementById('exportBtn').onclick = function() {
+                exportAllFormData();
+            };
+            
+            // Direct connection to save button using a unique function name
+            document.getElementById('saveBtn').onclick = function() {
+                saveAllFormData();
+            };
+            
+            function saveAllFormData() {
+                console.log("Comprehensive save triggered");
+                try {
+                    const completeData = gatherAllFormFields();
+                    localStorage.setItem('play_ember_tokenomics', JSON.stringify(completeData));
+                    console.log("Complete data saved:", completeData);
+                    alert('Data saved successfully!');
+                } catch (err) {
+                    console.error("Save error:", err);
+                    alert('Error saving data: ' + err.message);
+                }
+            }
+            
+            function exportAllFormData() {
+                console.log("Comprehensive export triggered");
+                try {
+                    const completeData = gatherAllFormFields();
+                    
+                    // Create file for download
+                    const jsonStr = JSON.stringify(completeData, null, 2);
+                    const blob = new Blob([jsonStr], {type: 'application/json'});
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Create and trigger download
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'play_ember_tokenomics.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Cleanup
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    console.log("Complete data exported:", completeData);
+                } catch (err) {
+                    console.error("Export error:", err);
+                    alert('Error exporting data: ' + err.message);
+                }
+            }
+            
+            function gatherAllFormFields() {
                 const data = {
-                    tokenModel: document.getElementById('tokenModel')?.value || '',
-                    tokenName: document.getElementById('tokenName')?.value || '',
-                    totalSupply: document.getElementById('totalSupply')?.value || '',
-                    initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
-                    communityAllocation: document.getElementById('communityAllocation')?.value || '',
-                    teamAllocation: document.getElementById('teamAllocation')?.value || '',
-                    investorsAllocation: document.getElementById('investorsAllocation')?.value || '',
-                    reservesAllocation: document.getElementById('reservesAllocation')?.value || ''
+                    // Token Model Section
+                    tokenModel: {
+                        type: document.getElementById('tokenModel')?.value || '',
+                        primaryToken: document.getElementById('tokenName')?.value || '',
+                        governanceToken: document.getElementById('governanceTokenName')?.value || '',
+                        utilityToken: document.getElementById('utilityTokenName')?.value || ''
+                    },
+                    
+                    // Token Supply Section
+                    supply: {
+                        totalSupply: document.getElementById('totalSupply')?.value || '',
+                        initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
+                        emissionSchedule: document.getElementById('emissionSchedule')?.value || ''
+                    },
+                    
+                    // Token Allocation Section
+                    allocation: {
+                        community: document.getElementById('communityAllocation')?.value || '',
+                        team: document.getElementById('teamAllocation')?.value || '',
+                        investors: document.getElementById('investorsAllocation')?.value || '',
+                        reserves: document.getElementById('reservesAllocation')?.value || '',
+                        customAllocations: getCustomAllocations()
+                    },
+                    
+                    // Blockchain Distribution Section
+                    blockchains: getBlockchainDistribution(),
+                    
+                    // Game Economy Section
+                    gameEconomy: {
+                        earningMechanics: document.getElementById('earningMechanics')?.value || '',
+                        spendingMechanics: document.getElementById('spendingMechanics')?.value || ''
+                    },
+                    
+                    // Governance Section
+                    governance: {
+                        model: document.getElementById('governanceModel')?.value || '',
+                        votingMechanism: document.getElementById('votingMechanism')?.value || '',
+                        decisionAreas: document.getElementById('decisionAreas')?.value || ''
+                    },
+                    
+                    // Deflationary Measures Section
+                    deflationary: {
+                        tokenBurning: document.getElementById('tokenBurning')?.value || '',
+                        inGameSinks: document.getElementById('inGameSinks')?.value || '',
+                        incentiveMechanisms: document.getElementById('incentiveMechanisms')?.value || ''
+                    },
+                    
+                    // Exchange Listings Section
+                    exchanges: {
+                        cex: getCexListings()
+                    }
                 };
                 
-                localStorage.setItem('tokenomicsData', JSON.stringify(data));
-                alert('Data saved successfully!');
-            } catch (err) {
-                console.error("Save error:", err);
-                alert('Error saving: ' + err.message);
+                return data;
             }
-        }
-        
-        function exportData() {
-            console.log("Export button clicked directly");
-            try {
-                // Simple data collection
-                const data = {
-                    tokenModel: document.getElementById('tokenModel')?.value || '',
-                    tokenName: document.getElementById('tokenName')?.value || '',
-                    totalSupply: document.getElementById('totalSupply')?.value || '',
-                    initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
-                    communityAllocation: document.getElementById('communityAllocation')?.value || '',
-                    teamAllocation: document.getElementById('teamAllocation')?.value || '',
-                    investorsAllocation: document.getElementById('investorsAllocation')?.value || '',
-                    reservesAllocation: document.getElementById('reservesAllocation')?.value || ''
-                };
-                
-                // Create download
-                const jsonStr = JSON.stringify(data, null, 2);
-                const blob = new Blob([jsonStr], {type: 'application/json'});
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'tokenomics_data.json';
-                a.textContent = 'Download JSON';
-                
-                // Directly add to document and click
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up
-                setTimeout(function() {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            } catch (err) {
-                console.error("Export error:", err);
-                alert('Error exporting: ' + err.message);
+            
+            // Helper functions to collect dynamic data
+            function getCustomAllocations() {
+                const allocations = [];
+                document.querySelectorAll('.custom-allocation-row').forEach(row => {
+                    const name = row.querySelector('.custom-name')?.value || '';
+                    const value = row.querySelector('.custom-value')?.value || '';
+                    
+                    if (name.trim() !== '') {
+                        allocations.push({
+                            name: name,
+                            percentage: value
+                        });
+                    }
+                });
+                return allocations;
             }
-        }
+            
+            function getBlockchainDistribution() {
+                const blockchains = [];
+                document.querySelectorAll('.blockchain-item').forEach(item => {
+                    const nameInput = item.querySelector('input[id^="blockchain"]');
+                    const liquidityInput = item.querySelector('input[id^="liquidity"]');
+                    const contractInput = item.querySelector('input[id^="contract"]');
+                    
+                    if (nameInput && nameInput.value.trim() !== '') {
+                        blockchains.push({
+                            name: nameInput.value,
+                            liquidityPercentage: liquidityInput?.value || '0',
+                            contractType: contractInput?.value || ''
+                        });
+                    }
+                });
+                return blockchains;
+            }
+            
+            function getCexListings() {
+                const exchanges = [];
+                document.querySelectorAll('.exchange-item').forEach(item => {
+                    const nameInput = item.querySelector('.exchange-name');
+                    
+                    if (nameInput && nameInput.value.trim() !== '') {
+                        exchanges.push(nameInput.value);
+                    }
+                });
+                return exchanges;
+            }
+            
+            console.log("Export functionality initialized");
+        })();
     </script>
 </body>
 </html> 

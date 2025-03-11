@@ -78,14 +78,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (saveBtn) {
         saveBtn.addEventListener('click', function() {
             console.log("Save button clicked");
-            saveFormData();
+            saveData();
         });
     }
     
     if (exportBtn) {
         exportBtn.addEventListener('click', function() {
             console.log("Export button clicked");
-            exportFormData();
+            exportData();
         });
     }
 
@@ -784,41 +784,180 @@ function populateFormData(data) {
     document.getElementById('additionalNotes').value = data.additionalNotes || '';
 }
 
-// Ensure these functions are defined
-function saveFormData() {
-    console.log("Running saveFormData function");
+// Comprehensive form data saving/exporting functionality
+function saveData() {
+    console.log("Save button clicked");
     try {
-        const data = getFormData();
-        console.log("Form data collected:", data);
+        // Get all form data
+        const data = collectAllFormData();
+        
+        // Save to localStorage
         localStorage.setItem('tokenomicsData', JSON.stringify(data));
         alert('Data saved successfully!');
-    } catch (error) {
-        console.error('Error saving data:', error);
-        alert('Error saving data: ' + error.message);
+        console.log("Saved data:", data);
+    } catch (err) {
+        console.error("Save error:", err);
+        alert('Error saving: ' + err.message);
     }
 }
 
-function exportFormData() {
-    console.log("Running exportFormData function");
+function exportData() {
+    console.log("Export button clicked");
     try {
-        const data = getFormData();
-        console.log("Form data collected for export:", data);
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
+        // Get all form data
+        const data = collectAllFormData();
+        
+        // Create download
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         
-        const downloadLink = document.createElement('a');
-        downloadLink.href = url;
-        downloadLink.download = 'playember_tokenomics.json';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'play_ember_tokenomics.json';
+        a.textContent = 'Download JSON';
         
-        URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Error exporting data:', error);
-        alert('Error exporting data: ' + error.message);
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(function() {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+        
+        console.log("Exported data:", data);
+    } catch (err) {
+        console.error("Export error:", err);
+        alert('Error exporting: ' + err.message);
     }
+}
+
+function collectAllFormData() {
+    // Create a comprehensive data object
+    const data = {
+        // Token Model
+        tokenModel: {
+            model: document.getElementById('tokenModel')?.value || 'single',
+            primaryToken: document.getElementById('tokenName')?.value || '',
+            governanceToken: document.getElementById('governanceTokenName')?.value || ''
+        },
+        
+        // Token Supply
+        tokenSupply: {
+            totalSupply: document.getElementById('totalSupply')?.value || '',
+            initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
+            emissionSchedule: document.getElementById('emissionSchedule')?.value || ''
+        },
+        
+        // Governance
+        governance: {
+            model: document.getElementById('governanceModel')?.value || '',
+            votingMechanism: document.getElementById('votingMechanism')?.value || ''
+        },
+        
+        // Token Allocation
+        tokenAllocation: {
+            community: document.getElementById('communityAllocation')?.value || '',
+            team: document.getElementById('teamAllocation')?.value || '',
+            investors: document.getElementById('investorsAllocation')?.value || '',
+            reserves: document.getElementById('reservesAllocation')?.value || '',
+            customAllocations: getCustomAllocations()
+        },
+        
+        // Blockchain Distribution
+        blockchainDistribution: getBlockchainDistribution(),
+        
+        // Game Economy
+        gameEconomy: {
+            earningMechanics: document.getElementById('earningMechanics')?.value || '',
+            spendingMechanics: document.getElementById('spendingMechanics')?.value || ''
+        },
+        
+        // Deflationary Measures
+        deflationaryMeasures: {
+            tokenBurning: document.getElementById('tokenBurning')?.value || '',
+            inGameSinks: document.getElementById('inGameSinks')?.value || '',
+            incentiveMechanisms: document.getElementById('incentiveMechanisms')?.value || ''
+        },
+        
+        // Exchange Listings
+        exchangeListings: {
+            cex: getCexListings()
+        }
+    };
+    
+    return data;
+}
+
+// Helper functions to collect dynamic data
+function getCustomAllocations() {
+    const allocations = [];
+    document.querySelectorAll('.custom-allocation-row').forEach(row => {
+        const name = row.querySelector('.custom-name')?.value || '';
+        const value = row.querySelector('.custom-value')?.value || '';
+        
+        if (name.trim() !== '') {
+            allocations.push({
+                name: name,
+                percentage: value
+            });
+        }
+    });
+    return allocations;
+}
+
+function getBlockchainDistribution() {
+    const blockchains = [];
+    document.querySelectorAll('.blockchain-item').forEach(item => {
+        const nameInput = item.querySelector('input[id^="blockchain"]');
+        const liquidityInput = item.querySelector('input[id^="liquidity"]');
+        const contractInput = item.querySelector('input[id^="contract"]');
+        
+        if (nameInput && nameInput.value.trim() !== '') {
+            blockchains.push({
+                name: nameInput.value,
+                liquidityPercentage: liquidityInput?.value || '0',
+                contractType: contractInput?.value || ''
+            });
+        }
+    });
+    return blockchains;
+}
+
+function getCexListings() {
+    const exchanges = [];
+    document.querySelectorAll('.exchange-item').forEach(item => {
+        const nameInput = item.querySelector('.exchange-name');
+        
+        if (nameInput && nameInput.value.trim() !== '') {
+            exchanges.push(nameInput.value);
+        }
+    });
+    return exchanges;
+}
+
+// Function to load saved data (for future use)
+function loadSavedData() {
+    try {
+        const savedData = localStorage.getItem('tokenomicsData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            populateFormWithData(data);
+            alert('Data loaded successfully!');
+        } else {
+            alert('No saved data found.');
+        }
+    } catch (err) {
+        console.error("Load error:", err);
+        alert('Error loading saved data: ' + err.message);
+    }
+}
+
+// Populate form with saved data (for future implementation)
+function populateFormWithData(data) {
+    // This function would restore form values from saved data
+    // Implementation left for future enhancement
+    console.log("Data to populate form:", data);
 }
 
 const express = require('express');
