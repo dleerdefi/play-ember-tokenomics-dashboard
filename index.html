@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Ember Tokenomics Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Add this script to detect if Chart.js loaded properly -->
+    <script>
+        // Wait for window to fully load
+        window.onload = function() {
+            console.log("Window fully loaded");
+            
+            // Global chart variables
+            let allocationChart = null;
+            let blockchainChart = null;
+            
+            // Function to update allocation chart
+            function updateAllocationChart() {
+                console.log("Updating allocation chart");
+                
+                // Get standard allocations
+                const communityValue = parseFloat(document.getElementById('communityAllocation').value) || 0;
+                const teamValue = parseFloat(document.getElementById('teamAllocation').value) || 0; 
+                const investorsValue = parseFloat(document.getElementById('investorsAllocation').value) || 0;
+                const reservesValue = parseFloat(document.getElementById('reservesAllocation').value) || 0;
+                
+                // Get custom allocations
+                const customNames = [];
+                const customValues = [];
+                
+                document.querySelectorAll('.custom-allocation-row').forEach(row => {
+                    const nameInput = row.querySelector('.custom-name');
+                    const valueInput = row.querySelector('.custom-value');
+                    
+                    if (nameInput && valueInput && nameInput.value.trim() !== '') {
+                        customNames.push(nameInput.value);
+                        customValues.push(parseFloat(valueInput.value) || 0);
+                    }
+                });
+                
+                // Combine all allocations
+                const labels = ['Community & Ecosystem', 'Team & Advisors', 'Investors', 'Reserves', ...customNames];
+                const values = [communityValue, teamValue, investorsValue, reservesValue, ...customValues];
+                
+                // Generate colors (more than needed to handle any number of custom allocations)
+                const backgroundColors = [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#8AC656', '#F2C094',
+                    '#5D9CEC', '#AC92EC', '#EC87C0', '#CCD1D9'
+                ];
+                
+                const ctx = document.getElementById('allocationChart');
+                if (!ctx) {
+                    console.error("Cannot find allocation chart canvas");
+                    return;
+                }
+                
+                // If chart already exists, destroy it
+                if (allocationChart) {
+                    allocationChart.destroy();
+                }
+                
+                // Create new chart
+                allocationChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log("Allocation chart updated with values:", values);
+            }
+            
+            // Function to update blockchain chart
+            function updateBlockchainChart() {
+                console.log("Updating blockchain chart");
+                
+                // Get all blockchain data from inputs
+                const blockchainNames = [];
+                const blockchainValues = [];
+                
+                document.querySelectorAll('.blockchain-item').forEach(item => {
+                    const nameInput = item.querySelector('input[id^="blockchain"]');
+                    const valueInput = item.querySelector('input[id^="liquidity"]');
+                    
+                    if (nameInput && valueInput && nameInput.value.trim() !== '') {
+                        blockchainNames.push(nameInput.value);
+                        blockchainValues.push(parseFloat(valueInput.value) || 0);
+                    }
+                });
+                
+                // If no blockchains, add a placeholder
+                if (blockchainNames.length === 0) {
+                    blockchainNames.push('Add a blockchain');
+                    blockchainValues.push(100);
+                }
+                
+                // Generate colors
+                const backgroundColors = [
+                    '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#8AC656', '#F2C094'
+                ];
+                
+                const ctx = document.getElementById('blockchainChart');
+                if (!ctx) {
+                    console.error("Cannot find blockchain chart canvas");
+                    return;
+                }
+                
+                // If chart already exists, destroy it
+                if (blockchainChart) {
+                    blockchainChart.destroy();
+                }
+                
+                // Create new chart
+                blockchainChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: blockchainNames,
+                        datasets: [{
+                            data: blockchainValues,
+                            backgroundColor: backgroundColors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log("Blockchain chart updated with values:", blockchainValues);
+            }
+            
+            // Initialize charts
+            setTimeout(function() {
+                updateAllocationChart();
+                updateBlockchainChart();
+                
+                // Set up event listeners for allocation inputs
+                document.getElementById('communityAllocation').addEventListener('input', updateAllocationChart);
+                document.getElementById('teamAllocation').addEventListener('input', updateAllocationChart);
+                document.getElementById('investorsAllocation').addEventListener('input', updateAllocationChart);
+                document.getElementById('reservesAllocation').addEventListener('input', updateAllocationChart);
+                
+                // Set up custom allocation button
+                const addCustomBtn = document.getElementById('addCustomAllocation');
+                if (addCustomBtn) {
+                    addCustomBtn.addEventListener('click', function() {
+                        const customAllocations = document.getElementById('customAllocations');
+                        if (!customAllocations) return;
+                        
+                        const customRow = document.createElement('div');
+                        customRow.className = 'custom-allocation-row';
+                        customRow.innerHTML = `
+                            <input type="text" class="custom-name" placeholder="Allocation Name">
+                            <input type="number" class="custom-value" min="0" max="100" value="0">
+                            <span class="percentage-symbol">%</span>
+                            <button class="remove-btn">×</button>
+                        `;
+                        
+                        customAllocations.appendChild(customRow);
+                        
+                        // Add input event listeners
+                        customRow.querySelector('.custom-name').addEventListener('input', updateAllocationChart);
+                        customRow.querySelector('.custom-value').addEventListener('input', updateAllocationChart);
+                        
+                        // Add remove button handler
+                        customRow.querySelector('.remove-btn').addEventListener('click', function() {
+                            customAllocations.removeChild(customRow);
+                            updateAllocationChart();
+                        });
+                        
+                        // Update chart with new row
+                        updateAllocationChart();
+                    });
+                }
+                
+                // Set up add blockchain button
+                const addBlockchainBtn = document.getElementById('addBlockchain');
+                if (addBlockchainBtn) {
+                    addBlockchainBtn.addEventListener('click', function() {
+                        const blockchainContainer = document.getElementById('blockchain-listings');
+                        if (!blockchainContainer) return;
+                        
+                        // Count existing blockchain items to generate unique IDs
+                        const blockchainCount = blockchainContainer.querySelectorAll('.blockchain-item').length + 1;
+                        
+                        const blockchainItem = document.createElement('div');
+                        blockchainItem.className = 'blockchain-item';
+                        blockchainItem.innerHTML = `
+                            <div class="input-group">
+                                <label for="blockchain${blockchainCount}">Blockchain Name:</label>
+                                <input type="text" id="blockchain${blockchainCount}" placeholder="e.g., Ethereum, Solana, etc.">
+                            </div>
+                            <div class="input-group">
+                                <label for="liquidity${blockchainCount}">Liquidity Allocation (%):</label>
+                                <input type="number" id="liquidity${blockchainCount}" min="0" max="100" value="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="contract${blockchainCount}">Contract Type/Standard:</label>
+                                <input type="text" id="contract${blockchainCount}" placeholder="e.g., ERC-20, SPL, etc.">
+                            </div>
+                            <button class="remove-blockchain-btn remove-btn">×</button>
+                        `;
+                        
+                        blockchainContainer.appendChild(blockchainItem);
+                        
+                        // Add input event listeners
+                        blockchainItem.querySelector(`#blockchain${blockchainCount}`).addEventListener('input', updateBlockchainChart);
+                        blockchainItem.querySelector(`#liquidity${blockchainCount}`).addEventListener('input', updateBlockchainChart);
+                        
+                        // Add remove button handler
+                        blockchainItem.querySelector('.remove-blockchain-btn').addEventListener('click', function() {
+                            blockchainContainer.removeChild(blockchainItem);
+                            updateBlockchainChart();
+                        });
+                        
+                        // Update chart with new blockchain
+                        updateBlockchainChart();
+                    });
+                }
+            }, 1000);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Play Ember Tokenomics Dashboard</h1>
+        
+        <div class="dashboard-grid">
+            <!-- Token Model Section (1/3 width) -->
+            <div class="dashboard-section">
+                <h2>Token Model</h2>
+                <div class="input-group">
+                    <label for="tokenModel">Token Model:</label>
+                    <select id="tokenModel">
+                        <option value="single">Single Token</option>
+                        <option value="dual">Dual Token</option>
+                    </select>
+                </div>
+                
+                <div id="singleTokenDetails">
+                    <div class="input-group">
+                        <label for="tokenName">Token Name:</label>
+                        <input type="text" id="tokenName" placeholder="e.g., EMBER">
+                    </div>
+                </div>
+                
+                <div id="dualTokenDetails" class="hidden">
+                    <div class="input-group">
+                        <label for="utilityTokenName">Utility Token Name:</label>
+                        <input type="text" id="utilityTokenName" placeholder="e.g., EMBER">
+                    </div>
+                    <div class="input-group">
+                        <label for="governanceTokenName">Governance Token Name:</label>
+                        <input type="text" id="governanceTokenName" placeholder="e.g., xEMBER">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Token Supply Section (1/3 width) -->
+            <div class="dashboard-section">
+                <h2>Token Supply</h2>
+                <div class="input-group">
+                    <label for="totalSupply">Total Supply:</label>
+                    <input type="number" id="totalSupply" placeholder="e.g., 1000000000">
+                </div>
+                <div class="input-group">
+                    <label for="initialCirculatingSupply">Initial Circulating Supply:</label>
+                    <input type="number" id="initialCirculatingSupply" placeholder="e.g., 100000000">
+                </div>
+                <div class="input-group">
+                    <label for="emissionSchedule">Emission Schedule:</label>
+                    <textarea id="emissionSchedule" placeholder="Describe your token emission schedule..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Governance Section (1/3 width) -->
+            <div class="dashboard-section">
+                <h2>Governance</h2>
+                <div class="input-group">
+                    <label for="governanceModel">Governance Model:</label>
+                    <select id="governanceModel">
+                        <option value="dao">DAO</option>
+                        <option value="foundation">Foundation</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="votingMechanism">Voting Mechanism:</label>
+                    <textarea id="votingMechanism" placeholder="Describe how governance voting works"></textarea>
+                </div>
+            </div>
+            
+            <!-- Token Allocation Section (full-width) -->
+            <div class="dashboard-section dashboard-full">
+                <h2>Token Allocation</h2>
+                <div class="allocation-inputs">
+                    <div class="input-group">
+                        <label for="communityAllocation">Community & Ecosystem (%):</label>
+                        <input type="number" id="communityAllocation" min="0" max="100" value="40">
+                    </div>
+                    <div class="input-group">
+                        <label for="teamAllocation">Team & Advisors (%):</label>
+                        <input type="number" id="teamAllocation" min="0" max="100" value="20">
+                    </div>
+                    <div class="input-group">
+                        <label for="investorsAllocation">Investors (%):</label>
+                        <input type="number" id="investorsAllocation" min="0" max="100" value="20">
+                    </div>
+                    <div class="input-group">
+                        <label for="reservesAllocation">Reserves (%):</label>
+                        <input type="number" id="reservesAllocation" min="0" max="100" value="20">
+                    </div>
+                    
+                    <!-- Custom allocation section -->
+                    <div id="customAllocations">
+                        <!-- Custom allocations will be added here -->
+                    </div>
+                    
+                    <div class="custom-allocation-controls">
+                        <button id="addCustomAllocation" class="secondary-btn">+ Add Custom Allocation</button>
+                    </div>
+                </div>
+                
+                <div id="allocationWarning" class="warning hidden">
+                    Warning: Total allocation does not equal 100%
+                </div>
+                
+                <div class="chart-container" style="position: relative; height:400px; width:100%; border:1px solid #ddd; background:#fff;">
+                    <canvas id="allocationChart" style="width:100%; height:100%;"></canvas>
+                </div>
+            </div>
+            
+            <!-- Tokenomics Fundamentals Section -->
+            <div class="dashboard-section dashboard-full">
+                <h2>Tokenomics Fundamentals</h2>
+                <div class="input-group">
+                    <label for="initialMarketCap">Initial Market Cap ($):</label>
+                    <input type="number" id="initialMarketCap" placeholder="e.g., 1000000">
+                </div>
+                <div class="input-group">
+                    <label for="initialTokenPrice">Initial Token Price ($):</label>
+                    <input type="number" id="initialTokenPrice" step="0.000001" placeholder="e.g., 0.01">
+                </div>
+                <div class="input-group">
+                    <label for="vestingSchedule">Vesting Schedule:</label>
+                    <textarea id="vestingSchedule" placeholder="Team: 4 years with 1-year cliff, Investors: 1-year lock-up followed by linear vesting over the next year"></textarea>
+                </div>
+            </div>
+            
+            <!-- Game Economy Section -->
+            <div class="dashboard-section">
+                <h2>Game Economy</h2>
+                <div class="input-group">
+                    <label for="earningMechanics">Earning Mechanics:</label>
+                    <textarea id="earningMechanics" placeholder="Play-to-earn rewards, content creation incentives, referral bonuses"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="spendingMechanics">Spending Mechanics:</label>
+                    <textarea id="spendingMechanics" placeholder="In-game purchases, upgrades, premium content access"></textarea>
+                </div>
+            </div>
+            
+            <!-- Deflationary Measures Section -->
+            <div class="dashboard-section">
+                <h2>Deflationary Measures</h2>
+                <div class="input-group">
+                    <label for="tokenBurning">Token Burning:</label>
+                    <textarea id="tokenBurning" placeholder="Describe token burning mechanisms"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="inGameSinks">In-Game Sinks:</label>
+                    <textarea id="inGameSinks" placeholder="Describe in-game features that require token expenditure"></textarea>
+                </div>
+            </div>
+            
+            <!-- Regulatory Compliance Section -->
+            <div class="dashboard-section">
+                <h2>Regulatory Compliance</h2>
+                <div class="input-group">
+                    <label for="legalFramework">Legal Framework:</label>
+                    <textarea id="legalFramework" placeholder="Describe compliance with relevant securities laws and regulations"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="transparencyMeasures">Transparency Measures:</label>
+                    <textarea id="transparencyMeasures" placeholder="Describe communication strategies regarding token distribution and economics"></textarea>
+                </div>
+            </div>
+            
+            <!-- Blockchain Listings Section -->
+            <div class="dashboard-section dashboard-full">
+                <h2>Blockchain Listings</h2>
+                
+                <!-- Chart container -->
+                <div style="height: 400px; width: 100%; position: relative; margin-bottom: 30px;">
+                    <canvas id="blockchainChart"></canvas>
+                </div>
+                
+                <!-- Empty container for blockchain items -->
+                <div id="blockchain-listings">
+                    <!-- Blockchain items will be added dynamically -->
+                </div>
+                
+                <div class="blockchain-controls">
+                    <button id="addBlockchain" class="secondary-btn">+ Add Blockchain</button>
+                </div>
+                
+                <div id="liquidityWarning" class="warning hidden">
+                    Warning: Total liquidity allocation does not equal 100%
+                </div>
+            </div>
+            
+            <!-- Exchange Listings Section -->
+            <div class="dashboard-section dashboard-full">
+                <h2>Exchange Listings</h2>
+                <div class="input-group">
+                    <label for="cexListings">Centralized Exchanges (CEX):</label>
+                    <div id="cex-listings">
+                        <div class="exchange-item">
+                            <input type="text" placeholder="Exchange Name" class="exchange-name">
+                            <button class="remove-btn">×</button>
+                        </div>
+                    </div>
+                    <button id="addCEX" class="secondary-btn">+ Add CEX</button>
+                </div>
+            </div>
+            
+            <!-- Additional Notes Section (at the bottom) -->
+            <div class="dashboard-section dashboard-full">
+                <h2>Additional Notes</h2>
+                <div class="input-group">
+                    <textarea id="additionalNotes" placeholder="Add any additional notes or comments about your tokenomics strategy..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Save, Export buttons at the bottom -->
+            <div class="dashboard-section dashboard-full">
+                <div class="button-container">
+                    <button id="saveBtn" class="primary-btn" onclick="saveData()">Save Data</button>
+                    <button id="exportBtn" class="secondary-btn" onclick="exportData()">Export as JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    
+    <!-- Add these inline scripts at the bottom of your HTML file -->
+    <script>
+        function saveData() {
+            console.log("Save button clicked directly");
+            try {
+                // Simple data collection
+                const data = {
+                    tokenModel: document.getElementById('tokenModel')?.value || '',
+                    tokenName: document.getElementById('tokenName')?.value || '',
+                    totalSupply: document.getElementById('totalSupply')?.value || '',
+                    initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
+                    communityAllocation: document.getElementById('communityAllocation')?.value || '',
+                    teamAllocation: document.getElementById('teamAllocation')?.value || '',
+                    investorsAllocation: document.getElementById('investorsAllocation')?.value || '',
+                    reservesAllocation: document.getElementById('reservesAllocation')?.value || ''
+                };
+                
+                localStorage.setItem('tokenomicsData', JSON.stringify(data));
+                alert('Data saved successfully!');
+            } catch (err) {
+                console.error("Save error:", err);
+                alert('Error saving: ' + err.message);
+            }
+        }
+        
+        function exportData() {
+            console.log("Export button clicked directly");
+            try {
+                // Simple data collection
+                const data = {
+                    tokenModel: document.getElementById('tokenModel')?.value || '',
+                    tokenName: document.getElementById('tokenName')?.value || '',
+                    totalSupply: document.getElementById('totalSupply')?.value || '',
+                    initialCirculatingSupply: document.getElementById('initialCirculatingSupply')?.value || '',
+                    communityAllocation: document.getElementById('communityAllocation')?.value || '',
+                    teamAllocation: document.getElementById('teamAllocation')?.value || '',
+                    investorsAllocation: document.getElementById('investorsAllocation')?.value || '',
+                    reservesAllocation: document.getElementById('reservesAllocation')?.value || ''
+                };
+                
+                // Create download
+                const jsonStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'tokenomics_data.json';
+                a.textContent = 'Download JSON';
+                
+                // Directly add to document and click
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            } catch (err) {
+                console.error("Export error:", err);
+                alert('Error exporting: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,274 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+h2 {
+    color: #3498db;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    height: auto;
+}
+
+.dashboard-full {
+    grid-column: 1 / -1;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+input, select, textarea {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+    max-height: 200px;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    padding: 10px;
+    background-color: #ffffff;
+}
+
+.allocation-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.hidden {
+    display: none;
+}
+
+.warning {
+    color: #e74c3c;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .allocation-inputs {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.custom-allocation-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.custom-name {
+    flex: 3;
+    min-width: 200px;
+    padding: 8px;
+}
+
+.custom-value {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px;
+}
+
+.percentage-symbol {
+    margin-right: 5px;
+    margin-left: -5px;
+}
+
+.custom-allocation-controls {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+#addCustomAllocation {
+    padding: 8px 15px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#addCustomAllocation:hover {
+    background-color: #3a7bc8;
+}
+
+.remove-btn {
+    background: #ff5555;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    min-width: 24px;
+}
+
+/* Blockchain and Exchange Listings */
+.blockchain-item, .exchange-item {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+}
+
+.blockchain-controls, .exchange-controls {
+    margin: 15px 0;
+}
+
+.exchange-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.exchange-name {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px;
+}
+
+.blockchain-select {
+    flex: 1;
+}
+
+/* Chart styling for blockchain distribution */
+#blockchainChart {
+    margin-top: 20px;
+}
+
+.blockchain-item .input-group {
+    margin-bottom: 10px;
+}
+
+#cex-listings, #dex-listings {
+    margin-bottom: 10px;
+}
+
+/* Fix canvas element sizing */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Add styles for custom allocation and blockchain items */
+.blockchain-item {
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.remove-blockchain-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.blockchain-controls {
+    margin: 20px 0;
+}
+
+.exchange-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.exchange-name {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px;
+} 
